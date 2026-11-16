@@ -1,0 +1,380 @@
+REFRASCAN KNOWLEDGE BASE
+
+PROJECT OVERVIEW
+
+RefraScan is a deep learning clinical decision support application for fundus image-based refractive status classification. The system classifies retinal fundus images into three refractive-status categories: Myopia, Hyperopia, and Emmetropia.
+
+The system is designed as a supplementary pre-screening and decision-support tool for healthcare professionals. It is not intended to replace professional refraction procedures, comprehensive eye examinations, or the clinical judgment of qualified ophthalmologists.
+
+The study comparatively evaluates three CNN architectures: EfficientNetB3, ResNet50, and DenseNet121. After architecture comparison, the selected architecture is evaluated using two input configurations: fundus image only and fundus image combined with patient age.
+
+
+RESEARCH PROBLEM
+
+The study addresses the need for an AI-based approach that can classify refractive status from fundus images. Existing research has commonly focused on regression-based estimation of continuous refractive measurements, while relatively fewer studies have focused on direct multi-class classification of Myopia, Hyperopia, and Emmetropia using fundus images.
+
+The study also addresses the limited availability of locally applicable AI-based refractive-status classification systems in the Philippine context.
+
+
+OBJECTIVES
+
+The general objective is to develop and evaluate a deep learning-based clinical decision support application for classifying fundus images into Myopia, Hyperopia, and Emmetropia.
+
+The specific objectives are to:
+1. Prepare and preprocess the fundus image dataset and corresponding patient information.
+2. Design, develop, and compare EfficientNetB3, ResNet50, and DenseNet121 using transfer learning.
+3. Evaluate model performance using Accuracy, Macro Precision, Macro Recall, Macro F1-score, Balanced Accuracy, and class-specific metrics.
+4. Integrate the selected CNN model into a prototype clinical decision support application.
+5. Digitize and organize relevant ophthalmology clinic records.
+6. Assess the clinical usability, feasibility, and practical usefulness of the system through structured evaluation by licensed ophthalmologists from The Lasik Surgery Clinic of AUFMC.
+
+
+DATA SOURCES
+
+The study uses two data sources:
+
+1. PAPILA Dataset
+PAPILA is a publicly available ophthalmic dataset originally developed for glaucoma-related research. It contains retinal fundus images and associated clinical information, including refractive measurements.
+
+The study used the FundusImages and ClinicalData components relevant to refractive-status classification.
+
+PAPILA contains 488 retinal fundus images from 244 patients. The images are JPEG files with a resolution of 2,576 × 1,934 pixels.
+
+2. AUFMC Dataset
+The local dataset was collected from The Lasik Surgery Clinic of Angeles University Foundation Medical Center (AUFMC).
+
+The local dataset contains 560 records representing right-eye and left-eye records where available. The records were primarily sourced from patient files from 2024 to 2026.
+
+After preprocessing and removal of incomplete or unusable records, the combined final dataset contained 1,018 fundus images from 517 unique patients.
+
+The final class distribution was:
+- Myopia: 660 images (64.83%)
+- Hyperopia: 236 images (23.18%)
+- Emmetropia: 122 images (11.98%)
+
+The dataset therefore contains an imbalanced class distribution, with Myopia as the majority class and Emmetropia as the smallest class.
+
+
+DATA PRIVACY AND ETHICS
+
+The PAPILA dataset was already anonymized before public release.
+
+For the AUFMC dataset, formal permission was obtained from The Lasik Surgery Clinic before data collection. Personally identifiable information was excluded from the research dataset.
+
+The working dataset retained information necessary for the study, including fundus images, patient age, refractive measurements, spherical equivalent, eye side, and classification labels.
+
+Access to the local dataset was restricted to the research team and the data were used for academic and research purposes.
+
+
+REFRACTIVE STATUS CLASSIFICATION
+
+The study calculates Spherical Equivalent (SE) using:
+
+SE = Sphere + (Cylinder / 2)
+
+The refractive classes are assigned using the following thresholds:
+
+- Myopia: SE less than -0.50 diopters
+- Hyperopia: SE greater than +0.50 diopters
+- Emmetropia: SE between -0.50 and +0.50 diopters
+
+Sphere, cylinder, and spherical equivalent values are used for labeling and reference but are not provided as model input features.
+
+Patient age is the additional metadata feature evaluated in the image-and-age experiment.
+
+
+DATA PREPROCESSING
+
+The fundus images are converted to consistent image inputs and resized according to the requirements of the CNN architecture.
+
+EfficientNetB3 uses a 300 × 300 input resolution.
+
+ResNet50 and DenseNet121 use a 224 × 224 input resolution.
+
+Image normalization is applied according to the model requirements.
+
+Data augmentation is applied only to training data.
+
+Class weighting and focal loss are used to reduce the effects of class imbalance.
+
+Patient-level partitioning is used to reduce the possibility of data leakage.
+
+
+PATIENT-LEVEL PARTITIONING
+
+An untouched 15% patient-level holdout set is reserved before model development.
+
+The remaining 85% development dataset is used for model training and 10-fold Stratified Group Cross-Validation.
+
+Patient-level grouping ensures that images belonging to the same patient are not distributed across different partitions.
+
+The final holdout set is used only for the final evaluation of the selected configuration.
+
+
+CNN ARCHITECTURES
+
+Three CNN architectures are compared:
+
+1. EfficientNetB3
+EfficientNetB3 uses compound scaling to balance network depth, width, and input resolution.
+
+2. ResNet50
+ResNet50 uses residual connections that allow information to pass through the network through shortcut connections.
+
+3. DenseNet121
+DenseNet121 uses dense connectivity, where layers receive information from preceding layers, encouraging feature reuse.
+
+All three architectures use transfer learning with ImageNet-pretrained weights as their starting point.
+
+
+MODEL TRAINING
+
+Transfer learning is used to initialize the CNN models with pretrained ImageNet weights.
+
+The models are adapted to the fundus-image classification task through training and fine-tuning.
+
+Training uses class balancing techniques, data augmentation, early stopping, learning-rate adjustment, and model checkpointing.
+
+The final ResNet50 Image + Age configuration uses:
+- Batch size: 16
+- Initial learning rate: 0.0001
+- Fine-tuning learning rate: 0.00001
+- Initial training: up to 30 epochs
+- Progressive fine-tuning of upper backbone layers
+
+
+EVALUATION METRICS
+
+The study evaluates the models using:
+
+- Accuracy
+- Macro Precision
+- Macro Recall
+- Macro F1-score
+- Balanced Accuracy
+- Class-specific Precision
+- Class-specific Recall
+- Class-specific F1-score
+- Confusion Matrix
+
+Macro F1-score and Balanced Accuracy are emphasized as the primary comparison metrics because the three classes are unequally represented.
+
+Accuracy alone may be misleading when classes are imbalanced because a model can obtain high accuracy by performing well mainly on the majority class.
+
+
+ARCHITECTURE COMPARISON RESULTS
+
+Under the study's experimental conditions, ResNet50 obtained the highest observed Macro F1-score and Balanced Accuracy among the three evaluated architectures.
+
+ResNet50:
+- Macro F1-score: 0.5430 ± 0.0681
+- Balanced Accuracy: 0.6073 ± 0.0587
+
+EfficientNetB3:
+- Macro F1-score: 0.5260 ± 0.0620
+- Balanced Accuracy: 0.5884 ± 0.0538
+
+DenseNet121:
+- Macro F1-score: 0.5148 ± 0.0644
+- Balanced Accuracy: 0.5679 ± 0.0561
+
+Based on these observed results, ResNet50 was selected as the final CNN architecture.
+
+The result does not mean ResNet50 is universally superior to all CNN architectures. The comparison applies only to the architectures, dataset, preprocessing, training strategy, and experimental conditions used in the study.
+
+
+IMAGE-ONLY VS IMAGE + AGE
+
+After ResNet50 was selected, two input configurations were compared:
+
+1. Fundus Image Only
+2. Fundus Image + Patient Age
+
+ResNet50 Image Only:
+- Accuracy: 0.7432 ± 0.0303
+- Balanced Accuracy: 0.6523 ± 0.0553
+- Macro Precision: 0.6034 ± 0.0442
+- Macro Recall: 0.6523 ± 0.0553
+- Macro F1-score: 0.6077 ± 0.0435
+
+ResNet50 Image + Age:
+- Accuracy: 0.7464 ± 0.0432
+- Balanced Accuracy: 0.6538 ± 0.0556
+- Macro Precision: 0.6082 ± 0.0590
+- Macro Recall: 0.6538 ± 0.0556
+- Macro F1-score: 0.6145 ± 0.0610
+
+The Image + Age configuration produced slightly higher values across the principal macro-based performance measures.
+
+The Macro F1-score increased by approximately 0.0068, while Balanced Accuracy increased by approximately 0.0015.
+
+Because the Image + Age configuration produced the higher principal comparison metrics, it was selected as the final configuration.
+
+
+FINAL MODEL
+
+The final RefraScan model is ResNet50 using fundus images combined with patient age.
+
+The final model uses a 224 × 224 fundus image input and patient age as the only additional metadata feature.
+
+Sphere, cylinder, and spherical equivalent are excluded from model inputs because they are directly related to the refractive-status target.
+
+
+FINAL HOLDOUT RESULTS
+
+The final RefraScan model was evaluated on an untouched patient-level holdout set containing 154 fundus images from 78 patients. The holdout set was not used during model development, training, fine-tuning, or model-selection decisions.
+
+The final holdout performance was:
+- Accuracy: 0.7013
+- Macro Precision: 0.6219
+- Macro Recall: 0.6374
+- Macro F1-score: 0.6244
+- Balanced Accuracy: 0.6374
+
+Class-specific holdout performance:
+- Myopia: Precision 0.86, Recall 0.77, F1-score 0.81, Support 88
+- Hyperopia: Precision 0.59, Recall 0.77, F1-score 0.67, Support 39
+- Emmetropia: Precision 0.42, Recall 0.37, F1-score 0.39, Support 27
+
+
+FINAL HOLDOUT RESULTS
+
+Development/Cross-Validation:
+- Accuracy: 0.7464
+- Macro Precision: 0.6082
+- Macro Recall: 0.6538
+- Macro F1-score: 0.6145
+- Balanced Accuracy: 0.6538
+
+Final Holdout:
+- Accuracy: 0.7013
+- Macro Precision: 0.6219
+- Macro Recall: 0.6374
+- Macro F1-score: 0.6244
+- Balanced Accuracy: 0.6374
+
+The final holdout results show that the model retained measurable classification performance on previously unseen patients, although performance varied across the different evaluation metrics and refractive-status classes.
+
+
+CLASS-SPECIFIC HOLDOUT PERFORMANCE
+
+Myopia:
+- Precision: 0.86
+- Recall: 0.77
+- F1-score: 0.81
+- Support: 88
+
+Hyperopia:
+- Precision: 0.59
+- Recall: 0.77
+- F1-score: 0.67
+- Support: 39
+
+Emmetropia:
+- Precision: 0.42
+- Recall: 0.37
+- F1-score: 0.39
+- Support: 27
+
+Myopia had the highest class-specific F1-score.
+
+Emmetropia had the lowest F1-score and recall, indicating that it was the most difficult class for the final model to classify.
+
+The smaller number of Emmetropia samples may have contributed to its lower classification performance.
+
+
+CONFUSION MATRIX OBSERVATIONS
+
+For Myopia, 68 out of 88 samples were correctly classified.
+
+For Hyperopia, 30 out of 39 samples were correctly classified.
+
+For Emmetropia, 10 out of 27 samples were correctly classified.
+
+Among the Emmetropia samples, 5 were classified as Myopia and 12 were classified as Hyperopia.
+
+These results indicate that Emmetropia was more frequently misclassified than the other classes.
+
+
+GRAD-CAM
+
+Grad-CAM is used as a post-hoc visualization technique to examine regions of fundus images associated with the model's activation during prediction.
+
+The visualization is intended to provide qualitative insight into which image regions contributed to model predictions.
+
+
+REFRASCAN APPLICATION
+
+The RefraScan prototype contains several major components:
+
+1. Input and Patient Record Module
+Manages relevant patient information and provides the patient information and fundus image required for prediction.
+
+2. Preprocessing Module
+Applies image preprocessing and age preprocessing before model inference.
+
+3. Model Module
+Uses the selected ResNet50 model with fundus image and patient age to generate a three-class refractive-status prediction.
+
+4. Output Module
+Presents the predicted refractive-status category, model confidence, and available visualization or interpretation output.
+
+5. Record Management Module
+Provides functionality for organizing, viewing, searching, editing, and managing relevant patient records.
+
+The inference engine accepts patient information, eye side, and a fundus image. It preprocesses the image, performs model prediction, generates a heatmap, and stores the relevant inference details.
+
+
+CLINICAL PURPOSE
+
+RefraScan is intended to support preliminary refractive-status pre-screening and clinical decision-making.
+
+It is not a replacement for:
+- Professional refraction
+- Comprehensive eye examinations
+- Visual acuity assessment
+- Ophthalmologist judgment
+- Other conventional clinical procedures
+
+The system should therefore be treated as a supplementary clinical decision-support tool.
+
+
+CLINICAL VALIDATION
+
+The study includes evaluation of sample model predictions by a licensed ophthalmologist.
+
+The purpose of expert evaluation is to assess the clinical correctness and practical relevance of the system's outputs.
+
+The expert validation does not constitute a large-scale clinical trial or extensive field testing.
+
+
+LIMITATIONS
+
+The model's performance depends on the quality, size, class distribution, and diversity of the available fundus image dataset.
+
+The dataset contains substantially more Myopia samples than Hyperopia and Emmetropia samples.
+
+The study compares only EfficientNetB3, ResNet50, and DenseNet121 and does not evaluate all possible CNN or transformer architectures.
+
+The system only classifies Myopia, Hyperopia, and Emmetropia. It does not estimate continuous refractive values such as spherical equivalent and does not classify astigmatism.
+
+The system has not undergone large-scale clinical trials, extensive field testing, regulatory approval, or routine clinical deployment.
+
+The local clinical-record digitization is limited to information available within the clinic's existing patient records and does not include integration with existing hospital information systems.
+
+The PAPILA dataset originates from a clinical institution in Spain, while the AUFMC dataset provides Philippine-specific data. Differences between datasets, imaging devices, populations, and clinical settings may affect generalizability.
+
+
+RESEARCH FRAMEWORK
+
+The primary research framework is CRISP-DM.
+
+The six CRISP-DM phases are:
+1. Business Understanding
+2. Data Understanding
+3. Data Preparation
+4. Modeling
+5. Evaluation
+6. Deployment
+
+Selected principles of CRISP-ML(Q) are also used within the modeling and evaluation process for training, validation, evaluation, parameter optimization, and model refinement.
